@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<schemalist gettext-domain="floatingdock">
+<schemalist gettext-domain="d2dfloating">
   <enum id='org.gnome.shell.extensions.dash-to-dock.clickAction'>
     <value value='0' nick='skip'/>
     <value value='1' nick='minimize'/>
@@ -50,7 +50,7 @@
     <value value='8' nick='BINARY'/>
     <value value='9' nick='DOT'/>
   </enum>
-  <schema path="/org/gnome/shell/extensions/floating-dock/" id="org.gnome.shell.extensions.floating-dock">
+  <schema path="/org/gnome/shell/extensions/dash-to-dock-floating/" id="org.gnome.shell.extensions.dash-to-dock-floating">
     <key name="dock-position" enum="org.gnome.shell.extensions.dash-to-dock.position">
       <default>'BOTTOM'</default>
       <summary>Dock position</summary>

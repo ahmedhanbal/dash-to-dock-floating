@@ -12,6 +12,6 @@
     "description": "A floating dock extension for GNOME Shell, heavily based on Dash to Dock. Use margin and border radius settings to customize the floating look.",
     "original-author": "ahmed.alizahid14@gmail.com",
     "url": "https://github.com/ahmedhanbal/dash-to-dock-floating",
-    "gettext-domain": "floatingdock",
+    "gettext-domain": "d2dfloating",
     "version": 4
 }
