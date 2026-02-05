@@ -8,14 +8,14 @@ import {
     St,
 } from './dependencies/gi.js';
 
-import {Main} from './dependencies/shell/ui.js';
+import { Main } from './dependencies/shell/ui.js';
 
 import {
     Docking,
     Utils,
 } from './imports.js';
 
-const {signals: Signals} = imports;
+const { signals: Signals } = imports;
 
 /*
  * DEFAULT:  transparency given by theme
@@ -23,9 +23,9 @@ const {signals: Signals} = imports;
  * DYNAMIC:  apply 'transparent' style when no windows are close to the dock
  * */
 const TransparencyMode = {
-    DEFAULT:  0,
-    FIXED:    1,
-    DYNAMIC:  3,
+    DEFAULT: 0,
+    FIXED: 1,
+    DYNAMIC: 3,
 };
 
 const Labels = Object.freeze({
@@ -50,8 +50,8 @@ export class ThemeManager {
         this._dash = dock.dash;
 
         // initialize colors with generic values
-        this._customizedBackground = {red: 0, green: 0, blue: 0, alpha: 0};
-        this._customizedBorder = {red: 0, green: 0, blue: 0, alpha: 0};
+        this._customizedBackground = { red: 0, green: 0, blue: 0, alpha: 0 };
+        this._customizedBorder = { red: 0, green: 0, blue: 0, alpha: 0 };
         this._transparency = new Transparency(dock);
 
         this._signalsHandler.add([
@@ -108,17 +108,9 @@ export class ThemeManager {
         // We also limit the borderAlpha to a maximum of 1 (full opacity)
         borderAlpha = Math.min((borderAlpha / backgroundAlpha) * newAlpha, 1);
 
-        this._customizedBackground = `rgba(${
-            backgroundColor.red},${
-            backgroundColor.green},${
-            backgroundColor.blue},${
-            newAlpha})`;
+        this._customizedBackground = `rgba(${backgroundColor.red},${backgroundColor.green},${backgroundColor.blue},${newAlpha})`;
 
-        this._customizedBorder = `rgba(${
-            borderColor.red},${
-            borderColor.green},${
-            borderColor.blue},${
-            borderAlpha})`;
+        this._customizedBorder = `rgba(${borderColor.red},${borderColor.green},${borderColor.blue},${borderAlpha})`;
     }
 
     _getDefaultColors() {
@@ -158,7 +150,7 @@ export class ThemeManager {
         if (!backgroundColor)
             return;
 
-        const {settings} = Docking.DockManager;
+        const { settings } = Docking.DockManager;
 
         if (settings.customBackgroundColor) {
             // When applying a custom color, we need to check the alpha value,
@@ -167,7 +159,7 @@ export class ThemeManager {
             // the opacity will be set by the opaque/transparent styles anyway.
             let newAlpha = Math.round(backgroundColor.alpha / 2.55) / 100;
 
-            ({backgroundColor} = settings);
+            ({ backgroundColor } = settings);
             // backgroundColor is a string like rgb(0,0,0)
             const Color = Clutter.Color ?? Cogl.Color;
             const [ret, color] = Color.from_string(backgroundColor);
@@ -195,7 +187,7 @@ export class ThemeManager {
     }
 
     _updateCustomStyleClasses() {
-        const {settings} = Docking.DockManager;
+        const { settings } = Docking.DockManager;
 
         if (settings.applyCustomTheme)
             this._actor.add_style_class_name('dashtodock');
@@ -242,18 +234,30 @@ export class ThemeManager {
         if (!this._dash._background.get_stage())
             return;
 
-        const {settings} = Docking.DockManager;
+        const { settings } = Docking.DockManager;
+        const position = Utils.getPosition(settings);
+        log(`[Floating Dock] _adjustTheme called. Position: ${position}`);
 
         // Remove prior style edits
         this._dash._background.set_style(null);
         this._transparency.disable();
 
+        const borderRadius = settings.get_int('border-radius');
+        const floatingMargin = settings.get_int('floating-margin');
+        log(`[Floating Dock] borderRadius: ${borderRadius}, floatingMargin: ${floatingMargin}`);
+
+        const posString = ['top', 'right', 'bottom', 'left'][position];
+        this._dash.set_style(`margin-${posString}: ${floatingMargin}px;`);
+
         // If built-in theme is enabled do nothing else
-        if (settings.applyCustomTheme)
+        if (settings.applyCustomTheme) {
+            log(`[Floating Dock] applyCustomTheme is TRUE`);
+            this._dash._background.set_style(`border-radius: ${borderRadius}px;`);
             return;
+        }
 
         let newStyle = '';
-        const position = Utils.getPosition(settings);
+        // const position = Utils.getPosition(settings);
 
         // obtain theme border settings
         const themeNode = this._dash._background.get_theme_node();
@@ -265,20 +269,21 @@ export class ThemeManager {
         let borderMissingStyle = '';
 
         if (this._rtl && (position !== St.Side.RIGHT)) {
-            borderMissingStyle = `border-right: ${borderWidth}px solid ${
-                borderColor.to_string()};`;
+            borderMissingStyle = `border-right: ${borderWidth}px solid ${borderColor.to_string()};`;
         } else if (!this._rtl && (position !== St.Side.LEFT)) {
-            borderMissingStyle = `border-left: ${borderWidth}px solid ${
-                borderColor.to_string()};`;
+            borderMissingStyle = `border-left: ${borderWidth}px solid ${borderColor.to_string()};`;
         }
 
         newStyle = borderMissingStyle;
 
-        if (newStyle) {
-            // I do call set_style possibly twice so that only the background gets the transition.
-            // The transition-property css rules seems to be unsupported
-            this._dash._background.set_style(newStyle);
-        }
+        if (newStyle)
+            newStyle += `border-radius: ${borderRadius}px;`;
+        else
+            newStyle = `border-radius: ${borderRadius}px;`;
+
+        // I do call set_style possibly twice so that only the background gets the transition.
+        // The transition-property css rules seems to be unsupported
+        this._dash._background.set_style(newStyle);
 
         // Customize background
         const fixedTransparency = settings.transparencyMode === TransparencyMode.FIXED;
@@ -287,8 +292,9 @@ export class ThemeManager {
             this._transparency.enable();
         } else if (!defaultTransparency || settings.customBackgroundColor) {
             newStyle = `${newStyle}background-color:${this._customizedBackground}; ` +
-                       `border-color:${this._customizedBorder}; ` +
-                       'transition-delay: 0s; transition-duration: 0.250s;';
+                `border-color:${this._customizedBorder}; ` +
+                `border-radius: ${borderRadius}px; ` +
+                'transition-delay: 0s; transition-duration: 0.250s;';
             this._dash._background.set_style(newStyle);
         }
     }
@@ -305,13 +311,60 @@ export class ThemeManager {
             'custom-theme-shrink',
             'custom-theme-running-dots',
             'extend-height',
-            'force-straight-corner'];
+            'force-straight-corner',
+            'border-radius',
+            'floating-margin'];
 
         this._signalsHandler.add(...keys.map(key => [
             Docking.DockManager.settings,
             `changed::${key}`,
             () => this.updateCustomTheme(),
         ]));
+
+        this._signalsHandler.add(
+            Docking.DockManager.settings,
+            'changed::app-highlight-border-radius',
+            () => this._updateAppHighlightRadius()
+        );
+
+        this._signalsHandler.add(
+            Docking.DockManager.settings,
+            'changed::app-highlight-sync-dock-border',
+            () => this._updateAppHighlightRadius()
+        );
+
+        this._signalsHandler.add(
+            Docking.DockManager.settings,
+            'changed::border-radius',
+            () => {
+                if (Docking.DockManager.settings.get_boolean('app-highlight-sync-dock-border'))
+                    this._updateAppHighlightRadius();
+            }
+        );
+    }
+
+    _updateAppHighlightRadius() {
+        const { settings } = Docking.DockManager;
+        const sync = settings.get_boolean('app-highlight-sync-dock-border');
+        let radius;
+
+        if (sync)
+            radius = settings.get_int('border-radius');
+        else
+            radius = settings.get_int('app-highlight-border-radius');
+
+        const style = `border-radius: ${radius}px;`;
+
+        const icons = this._dash.getAppIcons();
+        icons.forEach(icon => {
+            if (icon.icon) {
+                icon.icon.set_style(style);
+            }
+        });
+
+        if (this._dash._showAppsIcon && this._dash._showAppsIcon.icon) {
+            this._dash._showAppsIcon.icon.set_style(style);
+        }
     }
 }
 Signals.addSignalMethods(ThemeManager.prototype);
@@ -392,7 +445,7 @@ class Transparency {
             // An irrelevant window actor ('Gnome-shell') produces an error when the signals are
             // disconnected, therefore do not add signals to it.
             return child instanceof Meta.WindowActor &&
-                   child.get_meta_window().get_wm_class() !== 'Gnome-shell';
+                child.get_meta_window().get_wm_class() !== 'Gnome-shell';
         }).forEach(function (win) {
             this._onWindowActorAdded(null, win);
         }, this);
@@ -468,9 +521,9 @@ class Transparency {
         const dash = this._dash;
         const windows = activeWorkspace.list_windows().filter(metaWindow => {
             return metaWindow.get_monitor() === dash._monitorIndex &&
-                   metaWindow.showing_on_its_workspace() &&
-                   metaWindow.get_window_type() !== Meta.WindowType.DESKTOP &&
-                   !metaWindow.skip_taskbar;
+                metaWindow.showing_on_its_workspace() &&
+                metaWindow.get_window_type() !== Meta.WindowType.DESKTOP &&
+                !metaWindow.skip_taskbar;
         });
 
         /* Check if at least one window is near enough to the panel.
@@ -517,17 +570,13 @@ class Transparency {
         this._getAlphas();
 
         this._transparent_style = `${this._base_actor_style
-        }background-color: rgba(${
-            this._backgroundColor}, ${this._transparentAlpha});` +
-            `border-color: rgba(${
-                this._backgroundColor}, ${this._transparentAlphaBorder});` +
+            }background-color: rgba(${this._backgroundColor}, ${this._transparentAlpha});` +
+            `border-color: rgba(${this._backgroundColor}, ${this._transparentAlphaBorder});` +
             `transition-duration: ${this._transparentTransition}ms;`;
 
         this._opaque_style = `${this._base_actor_style
-        }background-color: rgba(${
-            this._backgroundColor}, ${this._opaqueAlpha});` +
-            `border-color: rgba(${
-                this._backgroundColor},${this._opaqueAlphaBorder});` +
+            }background-color: rgba(${this._backgroundColor}, ${this._opaqueAlpha});` +
+            `border-color: rgba(${this._backgroundColor},${this._opaqueAlphaBorder});` +
             `transition-duration: ${this._opaqueTransition}ms;`;
 
         this.emit('styles-updated');
@@ -559,7 +608,7 @@ class Transparency {
 
         Main.uiGroup.remove_child(dummyObject);
 
-        const {settings} = Docking.DockManager;
+        const { settings } = Docking.DockManager;
 
         if (settings.customizeAlphas) {
             this._opaqueAlpha = settings.maxAlpha;

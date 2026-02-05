@@ -40,23 +40,23 @@ import {
     Utils,
 } from './imports.js';
 
-import {Extension} from './dependencies/shell/extensions/extension.js';
+import { Extension } from './dependencies/shell/extensions/extension.js';
 
 // Use __ () and N__() for the extension gettext domain, and reuse
 // the shell domain with the default _() and N_()
-const {gettext: __} = Extension;
+const { gettext: __ } = Extension;
 
-const {signals: Signals} = imports;
+const { signals: Signals } = imports;
 
 const DOCK_DWELL_CHECK_INTERVAL = 100;
 const ICON_ANIMATOR_DURATION = 3000;
 const STARTUP_ANIMATION_TIME = 500;
 
 export const State = Object.freeze({
-    HIDDEN:  0,
+    HIDDEN: 0,
     SHOWING: 1,
-    SHOWN:   2,
-    HIDING:  3,
+    SHOWN: 2,
+    HIDING: 3,
 });
 
 const scrollAction = Object.freeze({
@@ -174,7 +174,7 @@ const DashSlideContainer = GObject.registerClass({
      */
     vfunc_get_preferred_width(forHeight) {
         let [minWidth, natWidth] = super.vfunc_get_preferred_width(forHeight || 0);
-        if ((this.side ===  St.Side.LEFT) || (this.side === St.Side.RIGHT)) {
+        if ((this.side === St.Side.LEFT) || (this.side === St.Side.RIGHT)) {
             minWidth = (minWidth - this._slideoutSize) * this.slideX + this._slideoutSize;
             natWidth = (natWidth - this._slideoutSize) * this.slideX + this._slideoutSize;
         }
@@ -188,7 +188,7 @@ const DashSlideContainer = GObject.registerClass({
      */
     vfunc_get_preferred_height(forWidth) {
         let [minHeight, natHeight] = super.vfunc_get_preferred_height(forWidth || 0);
-        if ((this.side ===  St.Side.TOP) || (this.side ===  St.Side.BOTTOM)) {
+        if ((this.side === St.Side.TOP) || (this.side === St.Side.BOTTOM)) {
             minHeight = (minHeight - this._slideoutSize) * this.slideX + this._slideoutSize;
             natHeight = (natHeight - this._slideoutSize) * this.slideX + this._slideoutSize;
 
@@ -240,7 +240,7 @@ const DockedDash = GObject.registerClass({
         this._rtl = Clutter.get_default_text_direction() === Clutter.TextDirection.RTL;
 
         // Load settings
-        const {settings} = DockManager;
+        const { settings } = DockManager;
         this._isHorizontal = (this._position === St.Side.TOP) || (this._position === St.Side.BOTTOM);
 
         // Temporary ignore hover events linked to autohide for whatever reason
@@ -367,11 +367,11 @@ const DockedDash = GObject.registerClass({
                 'hiding',
                 this._onOverviewHiding.bind(this),
             ],
-            [
-                Main.overview,
-                'hidden',
-                this._onOverviewHidden.bind(this),
-            ]);
+                [
+                    Main.overview,
+                    'hidden',
+                    this._onOverviewHidden.bind(this),
+                ]);
         }
 
         this._themeManager = new Theming.ThemeManager(this);
@@ -524,7 +524,7 @@ const DockedDash = GObject.registerClass({
     }
 
     _bindSettingsChanges() {
-        const {settings} = DockManager;
+        const { settings } = DockManager;
         this._signalsHandler.add([
             settings,
             'changed::scroll-action',
@@ -596,7 +596,7 @@ const DockedDash = GObject.registerClass({
             'changed::show-show-apps-button',
             () => {
                 if (!Main.overview.isDummy &&
-                        settings.showShowAppsButton)
+                    settings.showShowAppsButton)
                     this.dash.showShowAppsButton();
                 else
                     this.dash.hideShowAppsButton();
@@ -649,11 +649,11 @@ const DockedDash = GObject.registerClass({
                 this.dash.resetAppIcons();
             },
         ],
-        [
-            settings,
-            'changed::extend-height',
-            this._resetPosition.bind(this),
-        ], [
+            [
+                settings,
+                'changed::extend-height',
+                this._resetPosition.bind(this),
+            ], [
             settings,
             'changed::height-fraction',
             this._resetPosition.bind(this),
@@ -699,7 +699,7 @@ const DockedDash = GObject.registerClass({
      * This is call when visibility settings change
      */
     _updateVisibilityMode() {
-        const {settings} = DockManager;
+        const { settings } = DockManager;
         if (DockManager.settings.dockFixed || DockManager.settings.manualhide) {
             this._autohideIsEnabled = false;
             this._intellihideIsEnabled = false;
@@ -742,7 +742,7 @@ const DockedDash = GObject.registerClass({
         if (Main.overview.visibleTarget)
             return;
 
-        const {settings} = DockManager;
+        const { settings } = DockManager;
 
         if (DockManager.settings.dockFixed) {
             this._removeAnimations();
@@ -832,7 +832,7 @@ const DockedDash = GObject.registerClass({
     _hide() {
         // If no hiding animation is running or queued
         if ((this._dockState === State.SHOWN) || (this._dockState === State.SHOWING)) {
-            const {settings} = DockManager;
+            const { settings } = DockManager;
             const delay = settings.hideDelay;
 
             if (this._dockState === State.SHOWING) {
@@ -906,7 +906,7 @@ const DockedDash = GObject.registerClass({
         // to support the old tray dwelling mechanism.
         if (this._autohideIsEnabled &&
             (!Utils.supportsExtendedBarriers() ||
-             !DockManager.settings.requirePressureToShow)) {
+                !DockManager.settings.requirePressureToShow)) {
             const pointerWatcher = PointerWatcher.getPointerWatcher();
             this._dockWatch = pointerWatcher.addWatch(
                 DOCK_DWELL_CHECK_INTERVAL, this._checkDockDwell.bind(this));
@@ -992,9 +992,9 @@ const DockedDash = GObject.registerClass({
     }
 
     _updatePressureBarrier() {
-        const {settings} = DockManager;
+        const { settings } = DockManager;
         this._canUsePressure = Utils.supportsExtendedBarriers();
-        const {pressureThreshold} = settings;
+        const { pressureThreshold } = settings;
 
         // Remove existing pressure barrier
         if (this._pressureBarrier) {
@@ -1034,40 +1034,40 @@ const DockedDash = GObject.registerClass({
         // In case the mouse move away from the dock area before hovering it,
         // in such case the leave event would never be triggered and the dock
         // would stay visible forever.
-        this._triggerTimeoutId =  GLib.timeout_add(GLib.PRIORITY_DEFAULT, 250, () => {
+        this._triggerTimeoutId = GLib.timeout_add(GLib.PRIORITY_DEFAULT, 250, () => {
             const [x, y, mods_] = global.get_pointer();
             let shouldHide = true;
             switch (this._position) {
-            case St.Side.LEFT:
-                if (x <= this.staticBox.x2 &&
-                    x >= this._monitor.x &&
-                    y >= this._monitor.y &&
-                    y <= this._monitor.y + this._monitor.height)
-                    shouldHide = false;
+                case St.Side.LEFT:
+                    if (x <= this.staticBox.x2 &&
+                        x >= this._monitor.x &&
+                        y >= this._monitor.y &&
+                        y <= this._monitor.y + this._monitor.height)
+                        shouldHide = false;
 
-                break;
-            case St.Side.RIGHT:
-                if (x >= this.staticBox.x1 &&
-                    x <= this._monitor.x + this._monitor.width &&
-                    y >= this._monitor.y &&
-                    y <= this._monitor.y + this._monitor.height)
-                    shouldHide = false;
+                    break;
+                case St.Side.RIGHT:
+                    if (x >= this.staticBox.x1 &&
+                        x <= this._monitor.x + this._monitor.width &&
+                        y >= this._monitor.y &&
+                        y <= this._monitor.y + this._monitor.height)
+                        shouldHide = false;
 
-                break;
-            case St.Side.TOP:
-                if (x >= this._monitor.x &&
-                    x <= this._monitor.x + this._monitor.width &&
-                    y <= this.staticBox.y2 &&
-                    y >= this._monitor.y)
-                    shouldHide = false;
+                    break;
+                case St.Side.TOP:
+                    if (x >= this._monitor.x &&
+                        x <= this._monitor.x + this._monitor.width &&
+                        y <= this.staticBox.y2 &&
+                        y >= this._monitor.y)
+                        shouldHide = false;
 
-                break;
-            case St.Side.BOTTOM:
-                if (x >= this._monitor.x &&
-                    x <= this._monitor.x + this._monitor.width &&
-                    y >= this.staticBox.y1 &&
-                    y <= this._monitor.y + this._monitor.height)
-                    shouldHide = false;
+                    break;
+                case St.Side.BOTTOM:
+                    if (x >= this._monitor.x &&
+                        x <= this._monitor.x + this._monitor.width &&
+                        y >= this.staticBox.y1 &&
+                        y <= this._monitor.y + this._monitor.height)
+                        shouldHide = false;
             }
             if (shouldHide) {
                 this._triggerTimeoutId = 0;
@@ -1174,7 +1174,7 @@ const DockedDash = GObject.registerClass({
         // Ensure variables linked to settings are updated.
         this._updateVisibilityMode();
 
-        const {dockFixed: fixedIsEnabled, dockExtended: extendHeight} = DockManager.settings;
+        const { dockFixed: fixedIsEnabled, dockExtended: extendHeight } = DockManager.settings;
 
         if (fixedIsEnabled)
             this.add_style_class_name('fixed');
@@ -1186,7 +1186,7 @@ const DockedDash = GObject.registerClass({
         // fixed dock.
         const workArea = Main.layoutManager.getWorkAreaForMonitor(this.monitorIndex);
 
-        let fraction = DockManager.settings.heightFraction;
+        let fraction = DockManager.settings.get_double('height-fraction');
         if (extendHeight)
             fraction = 1;
         else if ((fraction < 0) || (fraction > 1))
@@ -1227,13 +1227,14 @@ const DockedDash = GObject.registerClass({
                 this.remove_style_class_name('extended');
             }
         }
+        this.queue_relayout();
     }
 
     _updateVisibleDesktop() {
         if (!this._intellihideIsEnabled)
             return;
 
-        const {desktopIconsUsableArea} = DockManager.getDefault();
+        const { desktopIconsUsableArea } = DockManager.getDefault();
         if (this._position === St.Side.BOTTOM)
             desktopIconsUsableArea.setMargins(this.monitorIndex, 0, this._box.height, 0, 0);
         else if (this._position === St.Side.TOP)
@@ -1287,7 +1288,7 @@ const DockedDash = GObject.registerClass({
         // Restore dash accessibility
         Main.ctrlAltTabManager.addGroup(
             this.dash, _('Dash'), 'user-bookmarks-symbolic',
-            {focusCallback: this._onAccessibilityFocus.bind(this)});
+            { focusCallback: this._onAccessibilityFocus.bind(this) });
     }
 
     /**
@@ -1342,20 +1343,20 @@ const DockedDash = GObject.registerClass({
             }
 
             switch (event.get_scroll_direction()) {
-            case Clutter.ScrollDirection.UP:
-                direction = prevDirection;
-                break;
-            case Clutter.ScrollDirection.DOWN:
-                direction = nextDirection;
-                break;
-            case Clutter.ScrollDirection.SMOOTH: {
-                const [dx_, dy] = event.get_scroll_delta();
-                if (dy < 0)
+                case Clutter.ScrollDirection.UP:
                     direction = prevDirection;
-                else if (dy > 0)
+                    break;
+                case Clutter.ScrollDirection.DOWN:
                     direction = nextDirection;
-            }
-                break;
+                    break;
+                case Clutter.ScrollDirection.SMOOTH: {
+                    const [dx_, dy] = event.get_scroll_delta();
+                    if (dy < 0)
+                        direction = prevDirection;
+                    else if (dy > 0)
+                        direction = nextDirection;
+                }
+                    break;
             }
 
             if (direction) {
@@ -1415,7 +1416,7 @@ const DockedDash = GObject.registerClass({
     _activateApp(appIndex) {
         const children = this.dash._box.get_children().filter(actor => {
             return actor.child &&
-                       actor.child.app;
+                actor.child.app;
         });
 
         // Apps currently in the dash
@@ -1477,7 +1478,7 @@ const KeyboardShortcuts = class DashToDockKeyboardShortcuts {
 
         // Setup keyboard bindings for dash elements
         const keys = ['app-hotkey-', 'app-shift-hotkey-', 'app-ctrl-hotkey-'];
-        const {mainDock} = DockManager.getDefault();
+        const { mainDock } = DockManager.getDefault();
         keys.forEach(function (key) {
             for (let i = 0; i < NUM_HOTKEYS; i++) {
                 const appNum = i;
@@ -1508,11 +1509,11 @@ const KeyboardShortcuts = class DashToDockKeyboardShortcuts {
     }
 
     _optionalNumberOverlay() {
-        const {settings} = DockManager;
+        const { settings } = DockManager;
         this._shortcutIsSet = false;
         // Enable extra shortcut if either 'overlay' or 'show-dock' are true
         if (settings.hotKeys &&
-           (settings.hotkeysOverlay || settings.hotkeysShowDock))
+            (settings.hotkeysOverlay || settings.hotkeysShowDock))
             this._enableExtraShortcut();
 
         this._signalsHandler.add([
@@ -1531,10 +1532,10 @@ const KeyboardShortcuts = class DashToDockKeyboardShortcuts {
     }
 
     _checkHotkeysOptions() {
-        const {settings} = DockManager;
+        const { settings } = DockManager;
 
         if (settings.hotKeys &&
-           (settings.hotkeysOverlay || settings.hotkeysShowDock))
+            (settings.hotkeysOverlay || settings.hotkeysShowDock))
             this._enableExtraShortcut();
         else
             this._disableExtraShortcut();
@@ -1596,7 +1597,7 @@ const KeyboardShortcuts = class DashToDockKeyboardShortcuts {
  */
 const WorkspaceIsolation = class DashToDockWorkspaceIsolation {
     constructor() {
-        const {settings} = DockManager;
+        const { settings } = DockManager;
 
         this._signalsHandler = new Utils.GlobalSignalsHandler();
         this._injectionsHandler = new Utils.InjectionsHandler();
@@ -1689,8 +1690,8 @@ export class DockManager {
         this._vfuncInjections = new Utils.VFuncInjectionsHandler(this);
         this._propertyInjections = new Utils.PropertyInjectionsHandler(this);
         this._settings = this._extension.getSettings(
-            'org.gnome.shell.extensions.dash-to-dock');
-        this._appSwitcherSettings = new Gio.Settings({schema_id: 'org.gnome.shell.app-switcher'});
+            'org.gnome.shell.extensions.floating-dock');
+        this._appSwitcherSettings = new Gio.Settings({ schema_id: 'org.gnome.shell.app-switcher' });
         this._mapSettingsValues();
 
         this._iconTheme = new St.IconTheme();
@@ -1828,7 +1829,7 @@ export class DockManager {
     }
 
     _ensureLocations() {
-        const {showMounts, showTrash} = this.settings;
+        const { showMounts, showTrash } = this.settings;
 
         if (showTrash || showMounts) {
             if (!this._fm1Client)
@@ -1877,36 +1878,36 @@ export class DockManager {
                         /* eslint-enable no-invalid-this */
                     },
                 ],
-                [
-                    Shell.WindowTracker.prototype, 'get_window_app',
-                    function (originalMethod, window) {
-                        /* eslint-disable no-invalid-this */
-                        const locationApp = Locations.getRunningApps().find(a =>
-                            a.get_windows().includes(window));
-                        return locationApp ?? originalMethod.call(this, window);
-                        /* eslint-enable no-invalid-this */
-                    },
-                ],
-                [
-                    Shell.WindowTracker.prototype, 'get_app_from_pid',
-                    function (originalMethod, pid) {
-                        /* eslint-disable no-invalid-this */
-                        const locationApp = Locations.getRunningApps().find(a =>
-                            a.get_pids().includes(pid));
-                        return locationApp ?? originalMethod.call(this, pid);
-                        /* eslint-enable no-invalid-this */
-                    },
-                ]);
+                    [
+                        Shell.WindowTracker.prototype, 'get_window_app',
+                        function (originalMethod, window) {
+                            /* eslint-disable no-invalid-this */
+                            const locationApp = Locations.getRunningApps().find(a =>
+                                a.get_windows().includes(window));
+                            return locationApp ?? originalMethod.call(this, window);
+                            /* eslint-enable no-invalid-this */
+                        },
+                    ],
+                    [
+                        Shell.WindowTracker.prototype, 'get_app_from_pid',
+                        function (originalMethod, pid) {
+                            /* eslint-disable no-invalid-this */
+                            const locationApp = Locations.getRunningApps().find(a =>
+                                a.get_pids().includes(pid));
+                            return locationApp ?? originalMethod.call(this, pid);
+                            /* eslint-enable no-invalid-this */
+                        },
+                    ]);
 
-                const {get: defaultFocusAppGetter} = Object.getOwnPropertyDescriptor(
+                const { get: defaultFocusAppGetter } = Object.getOwnPropertyDescriptor(
                     Shell.WindowTracker.prototype, 'focus_app');
                 this._propertyInjections.addWithLabel(Labels.LOCATIONS,
                     Shell.WindowTracker.prototype, 'focus_app', {
-                        get() {
-                            const locationApp = Locations.getRunningApps().find(a => a.isFocused);
-                            return locationApp ?? defaultFocusAppGetter.call(this);
-                        },
-                    });
+                    get() {
+                        const locationApp = Locations.getRunningApps().find(a => a.isFocused);
+                        return locationApp ?? defaultFocusAppGetter.call(this);
+                    },
+                });
             }
         }
     }
@@ -1964,11 +1965,11 @@ export class DockManager {
                 `changed::${key}`, updateSetting);
             if (key !== camelKey) {
                 Object.defineProperty(this.settings, key,
-                    {get: () => this.settings[camelKey]});
+                    { get: () => this.settings[camelKey] });
             }
         });
         Object.defineProperties(this.settings, {
-            dockExtended: {get: () => this.settings.extendHeight},
+            dockExtended: { get: () => this.settings.extendHeight },
         });
     }
 
@@ -2092,7 +2093,7 @@ export class DockManager {
             for (let iMon = 0; iMon < nMon; iMon++) {
                 if (iMon === this._preferredMonitorIndex)
                     continue;
-                dock = new DockedDash({monitorIndex: iMon});
+                dock = new DockedDash({ monitorIndex: iMon });
                 this._allDocks.push(dock);
                 // connect app icon into the view selector
                 dock.dash.showAppsButton.connect('notify::checked',
@@ -2110,7 +2111,7 @@ export class DockManager {
 
     _prepareStartupAnimation() {
         DockManager.allDocks.forEach(dock => {
-            const {dash} = dock;
+            const { dash } = dock;
 
             dock.opacity = 255;
             dash.set({
@@ -2123,21 +2124,21 @@ export class DockManager {
 
     _runStartupAnimation() {
         DockManager.allDocks.forEach(dock => {
-            const {dash} = dock;
+            const { dash } = dock;
 
             switch (dock.position) {
-            case St.Side.LEFT:
-                dash.translation_x = -dash.width;
-                break;
-            case St.Side.RIGHT:
-                dash.translation_x = dash.width;
-                break;
-            case St.Side.BOTTOM:
-                dash.translation_y = dash.height;
-                break;
-            case St.Side.TOP:
-                dash.translation_y = -dash.height;
-                break;
+                case St.Side.LEFT:
+                    dash.translation_x = -dash.width;
+                    break;
+                case St.Side.RIGHT:
+                    dash.translation_x = dash.width;
+                    break;
+                case St.Side.BOTTOM:
+                    dash.translation_y = dash.height;
+                    break;
+                case St.Side.TOP:
+                    dash.translation_y = -dash.height;
+                    break;
             }
 
             dash.ease({
@@ -2194,9 +2195,9 @@ export class DockManager {
 
         // We also need to ignore max-size changes
         this._methodInjections.addWithLabel(Labels.MAIN_DASH, this._oldDash,
-            'setMaxSize', () => {});
+            'setMaxSize', () => { });
         this._methodInjections.addWithLabel(Labels.MAIN_DASH, this._oldDash,
-            'allocate', () => {});
+            'allocate', () => { });
         // And to return the preferred height depending on the state
         this._methodInjections.addWithLabel(Labels.MAIN_DASH, this._oldDash,
             'get_preferred_height', (_originalMethod, ...args) => {
@@ -2215,7 +2216,7 @@ export class DockManager {
 
             if (state === OverviewControls.ControlsState.WINDOW_PICKER) {
                 const searchBox = this.overviewControls._searchEntry.get_allocation_box();
-                const {shouldShow: wsThumbnails} = this.overviewControls._thumbnailsBox;
+                const { shouldShow: wsThumbnails } = this.overviewControls._thumbnailsBox;
 
                 if (!wsThumbnails) {
                     box.y1 += spacing;
@@ -2249,7 +2250,7 @@ export class DockManager {
             'allocate', function (container) {
                 /* eslint-disable no-invalid-this */
                 const oldPostAllocation = this._runPostAllocation;
-                this._runPostAllocation = () => {};
+                this._runPostAllocation = () => { };
 
                 const monitor = Main.layoutManager.findMonitorForActor(container);
                 const workArea = Main.layoutManager.getWorkAreaForMonitor(monitor.index);
@@ -2266,7 +2267,7 @@ export class DockManager {
                 const oldStartY = workAreaBox.y1;
 
                 const propertyInjections = new Utils.PropertyInjectionsHandler();
-                propertyInjections.add(Main.layoutManager.panelBox, 'height', {value: startY});
+                propertyInjections.add(Main.layoutManager.panelBox, 'height', { value: startY });
 
                 if (Main.layoutManager.panelBox.y === Main.layoutManager.primaryMonitor.y)
                     workAreaBox.y1 -= oldStartY;
@@ -2493,8 +2494,8 @@ export class DockManager {
     }
 
     _onShowAppsButtonToggled(button) {
-        const {checked} = button;
-        const {overviewControls} = this;
+        const { checked } = button;
+        const { overviewControls } = this;
 
         if (!Main.overview.visible) {
             this.mainDock.dash.showAppsButton._fromDesktop = true;
@@ -2525,7 +2526,7 @@ export class DockManager {
                 if (!this._toggleFavoriteItem.visible)
                     return;
 
-                const {id} = this._app;
+                const { id } = this._app;
                 this._toggleFavoriteItem.label.text = this._appFavorites.isFavorite(id)
                     ? _('Unpin') : __('Pin to Dock');
                 /* eslint-enable no-invalid-this */
@@ -2576,8 +2577,8 @@ export class DockManager {
 
         const position = Utils.getPosition();
         const isHorizontal = (position === St.Side.TOP) || (position === St.Side.BOTTOM);
-        const dockOnPrimary  = this._settings.multiMonitor ||
-                             this._preferredMonitorIndex === Main.layoutManager.primaryIndex;
+        const dockOnPrimary = this._settings.multiMonitor ||
+            this._preferredMonitorIndex === Main.layoutManager.primaryIndex;
 
         if (!isHorizontal && dockOnPrimary && this.settings.dockExtended && this.settings.dockFixed) {
             Main.panel._rightCorner.hide();
@@ -2664,7 +2665,7 @@ export class IconAnimator {
     addAnimation(target, name) {
         const targetDestroyId = target.connect('destroy',
             () => this.removeAnimation(target, name));
-        this._animations[name].push({target, targetDestroyId});
+        this._animations[name].push({ target, targetDestroyId });
         if (this._started && this._count === 0)
             this._timeline.start();
 

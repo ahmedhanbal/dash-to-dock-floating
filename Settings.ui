@@ -6,6 +6,21 @@
     <property name="step-increment">0.050000000000000003</property>
     <property name="page-increment">0.25</property>
   </object>
+  <object class="GtkAdjustment" id="floating_margin_adjustment">
+    <property name="upper">100</property>
+    <property name="step-increment">1</property>
+    <property name="page-increment">10</property>
+  </object>
+  <object class="GtkAdjustment" id="border_radius_adjustment">
+    <property name="upper">50</property>
+    <property name="step-increment">1</property>
+    <property name="page-increment">10</property>
+  </object>
+  <object class="GtkAdjustment" id="app_highlight_border_radius_adjustment">
+    <property name="upper">50</property>
+    <property name="step-increment">1</property>
+    <property name="page-increment">10</property>
+  </object>
   <object class="GtkBox" id="box_middle_click_options">
     <property name="can_focus">0</property>
     <property name="margin_start">12</property>
@@ -882,12 +897,213 @@
                 </child>
               </object>
             </child>
+
           </object>
         </property>
         <property name="tab">
           <object class="GtkLabel" id="general_label">
             <property name="can_focus">0</property>
             <property name="label" translatable="yes">Position and size</property>
+          </object>
+        </property>
+      </object>
+    </child>
+    <child>
+      <object class="GtkNotebookPage">
+        <property name="tab">
+          <object class="GtkLabel" id="floating_dock_tab_label">
+            <property name="can_focus">0</property>
+            <property name="label" translatable="yes">Floating Dock</property>
+          </object>
+        </property>
+        <property name="child">
+          <object class="GtkBox" id="floating_dock_page_box">
+            <property name="visible">True</property>
+            <property name="can_focus">0</property>
+            <property name="margin_top">24</property>
+            <property name="margin_bottom">24</property>
+            <property name="margin_start">24</property>
+            <property name="margin_end">24</property>
+            <property name="hexpand">1</property>
+            <property name="vexpand">1</property>
+            <property name="orientation">vertical</property>
+            <property name="spacing">24</property>
+            <child>
+              <object class="GtkFrame" id="floating_dock_frame">
+                <property name="can_focus">0</property>
+                <property name="child">
+                  <object class="GtkListBox" id="floating_dock_listbox">
+                    <property name="can_focus">0</property>
+                    <property name="selection_mode">none</property>
+                    <child>
+                      <object class="GtkListBoxRow" id="floating_margin_row">
+                        <property name="width_request">100</property>
+                        <property name="height_request">80</property>
+                        <property name="child">
+                          <object class="GtkGrid" id="floating_margin_grid">
+                            <property name="can_focus">0</property>
+                            <property name="margin_start">12</property>
+                            <property name="margin_end">12</property>
+                            <property name="margin_top">12</property>
+                            <property name="margin_bottom">12</property>
+                            <property name="column_spacing">32</property>
+                            <child>
+                              <object class="GtkLabel" id="floating_margin_label">
+                                <property name="can_focus">0</property>
+                                <property name="label" translatable="yes">Floating Margin</property>
+                                <layout>
+                                  <property name="column">0</property>
+                                  <property name="row">0</property>
+                                </layout>
+                              </object>
+                            </child>
+                            <child>
+                              <object class="GtkScale" id="floating_margin_scale">
+                                <property name="draw-value">1</property>
+                                <property name="hexpand">1</property>
+                                <property name="adjustment">floating_margin_adjustment</property>
+                                <property name="digits">0</property>
+                                <signal name="value-changed" handler="floating_margin_scale_value_changed_cb" />
+                                <layout>
+                                  <property name="column">2</property>
+                                  <property name="row">0</property>
+                                </layout>
+                              </object>
+                            </child>
+                          </object>
+                        </property>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkListBoxRow" id="border_radius_row">
+                        <property name="width_request">100</property>
+                        <property name="height_request">80</property>
+                        <property name="child">
+                          <object class="GtkGrid" id="border_radius_grid">
+                            <property name="can_focus">0</property>
+                            <property name="margin_start">12</property>
+                            <property name="margin_end">12</property>
+                            <property name="margin_top">12</property>
+                            <property name="margin_bottom">12</property>
+                            <property name="column_spacing">32</property>
+                            <child>
+                              <object class="GtkLabel" id="border_radius_label">
+                                <property name="can_focus">0</property>
+                                <property name="label" translatable="yes">Border Radius</property>
+                                <layout>
+                                  <property name="column">0</property>
+                                  <property name="row">0</property>
+                                </layout>
+                              </object>
+                            </child>
+                            <child>
+                              <object class="GtkScale" id="border_radius_scale">
+                                <property name="draw-value">1</property>
+                                <property name="hexpand">1</property>
+                                <property name="adjustment">border_radius_adjustment</property>
+                                <property name="digits">0</property>
+                                <signal name="value-changed" handler="border_radius_scale_value_changed_cb" />
+                                <layout>
+                                  <property name="column">2</property>
+                                  <property name="row">0</property>
+                                </layout>
+                              </object>
+                            </child>
+                          </object>
+                        </property>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkListBoxRow" id="app_highlight_sync_row">
+                        <property name="width_request">100</property>
+                        <property name="height_request">50</property>
+                        <property name="child">
+                          <object class="GtkGrid" id="app_highlight_sync_grid">
+                            <property name="can_focus">0</property>
+                            <property name="margin_start">12</property>
+                            <property name="margin_end">12</property>
+                            <property name="margin_top">6</property>
+                            <property name="margin_bottom">6</property>
+                            <property name="column_spacing">32</property>
+                            <child>
+                              <object class="GtkLabel" id="app_highlight_sync_label">
+                                <property name="can_focus">0</property>
+                                <property name="label" translatable="yes">Icon Highlight Radius</property>
+                                <property name="halign">start</property>
+                                <property name="hexpand">1</property>
+                                <layout>
+                                  <property name="column">0</property>
+                                  <property name="row">0</property>
+                                </layout>
+                              </object>
+                            </child>
+                            <child>
+                              <object class="GtkCheckButton" id="app_highlight_sync_check">
+                                <property name="can_focus">1</property>
+                                <property name="label" translatable="yes">Same as border radius</property>
+                                <property name="halign">end</property>
+                                <property name="valign">center</property>
+                                <signal name="toggled" handler="app_highlight_sync_check_toggled_cb" />
+                                <layout>
+                                  <property name="column">1</property>
+                                  <property name="row">0</property>
+                                </layout>
+                              </object>
+                            </child>
+                          </object>
+                        </property>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkListBoxRow" id="app_highlight_border_radius_row">
+                        <property name="width_request">100</property>
+                        <property name="height_request">50</property>
+                        <property name="child">
+                          <object class="GtkGrid" id="app_highlight_border_radius_grid">
+                            <property name="can_focus">0</property>
+                            <property name="margin_start">12</property>
+                            <property name="margin_end">12</property>
+                            <property name="margin_top">6</property>
+                            <property name="margin_bottom">6</property>
+                            <property name="column_spacing">32</property>
+                            <child>
+                              <object class="GtkLabel" id="app_highlight_border_radius_label">
+                                <property name="can_focus">0</property>
+                                <property name="label" translatable="yes">Custom</property>
+                                <property name="margin_start">20</property> <!-- Indent to look like subgroup -->
+                                <layout>
+                                  <property name="column">0</property>
+                                  <property name="row">0</property>
+                                </layout>
+                              </object>
+                            </child>
+                            <child>
+                              <object class="GtkScale" id="app_highlight_border_radius_scale">
+                                <property name="draw-value">1</property>
+                                <property name="hexpand">1</property>
+                                <property name="adjustment">app_highlight_border_radius_adjustment</property>
+                                <property name="digits">0</property>
+                                <signal name="value-changed" handler="app_highlight_border_radius_scale_value_changed_cb" />
+                                <layout>
+                                  <property name="column">1</property>
+                                  <property name="row">0</property>
+                                </layout>
+                              </object>
+                            </child>
+                          </object>
+                        </property>
+                      </object>
+                    </child>
+                  </object>
+                </property>
+                <child type="label_item">
+                  <placeholder/>
+                </child>
+              </object>
+            </child>
+            <child>
+               <placeholder/>
+            </child>
           </object>
         </property>
       </object>
@@ -2535,6 +2751,7 @@ See the &lt;a href=&quot;https://www.gnu.org/licenses/old-licenses/gpl-2.0.html&
         </child>
       </object>
     </child>
+
   </object>
   <object class="GtkAdjustment" id="pressure_threshold_adjustment">
     <property name="upper">100</property>

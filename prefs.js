@@ -135,9 +135,9 @@ const MonitorsConfig = GObject.registerClass({
         // for monitors, it can be removed when we don't care about breaking
         // old user configurations or external apps configuring this extension
         // such as ubuntu's gnome-control-center.
-        const {index: primaryMonitorIndex} = this._primaryMonitor;
+        const { index: primaryMonitorIndex } = this._primaryMonitor;
         for (const monitor of this._monitors) {
-            let {index} = monitor;
+            let { index } = monitor;
             // The The dock uses the Gdk index for monitors, where the primary monitor
             // always has index 0, so let's follow what dash-to-dock does in docking.js
             // (as part of _createDocks), but using inverted math
@@ -182,8 +182,8 @@ const DockSettings = GObject.registerClass({
 
         this._extensionPreferences = extensionPreferences;
         this._settings = extensionPreferences.getSettings(
-            'org.gnome.shell.extensions.dash-to-dock');
-        this._appSwitcherSettings = new Gio.Settings({schema_id: 'org.gnome.shell.app-switcher'});
+            'org.gnome.shell.extensions.floating-dock');
+        this._appSwitcherSettings = new Gio.Settings({ schema_id: 'org.gnome.shell.app-switcher' });
         this._rtl = Gtk.Widget.get_default_direction() === Gtk.TextDirection.RTL;
 
         this._builder = new Gtk.Builder();
@@ -205,6 +205,9 @@ const DockSettings = GObject.registerClass({
         this._dock_size_timeout = 0;
         this._icon_size_timeout = 0;
         this._opacity_timeout = 0;
+        this._floating_margin_timeout = 0;
+        this._border_radius_timeout = 0;
+        this._app_highlight_border_radius_timeout = 0;
 
         this._monitorsConfig = new MonitorsConfig();
         this._bindSettings();
@@ -224,6 +227,21 @@ const DockSettings = GObject.registerClass({
         if (this._opacity_timeout) {
             GLib.source_remove(this._opacity_timeout);
             delete this._opacity_timeout;
+        }
+
+        if (this._floating_margin_timeout) {
+            GLib.source_remove(this._floating_margin_timeout);
+            delete this._floating_margin_timeout;
+        }
+
+        if (this._border_radius_timeout) {
+            GLib.source_remove(this._border_radius_timeout);
+            delete this._border_radius_timeout;
+        }
+
+        if (this._app_highlight_border_radius_timeout) {
+            GLib.source_remove(this._app_highlight_border_radius_timeout);
+            delete this._app_highlight_border_radius_timeout;
         }
     }
 
@@ -283,6 +301,45 @@ const DockSettings = GObject.registerClass({
                 this._dock_size_timeout = 0;
                 return GLib.SOURCE_REMOVE;
             });
+    }
+
+    floating_margin_scale_value_changed_cb(scale) {
+        if (this._floating_margin_timeout > 0)
+            GLib.source_remove(this._floating_margin_timeout);
+        this._floating_margin_timeout = GLib.timeout_add(
+            GLib.PRIORITY_DEFAULT, SCALE_UPDATE_TIMEOUT, () => {
+                this._settings.set_int('floating-margin', scale.get_value());
+                this._floating_margin_timeout = 0;
+                return GLib.SOURCE_REMOVE;
+            });
+    }
+
+    border_radius_scale_value_changed_cb(scale) {
+        if (this._border_radius_timeout > 0)
+            GLib.source_remove(this._border_radius_timeout);
+        this._border_radius_timeout = GLib.timeout_add(
+            GLib.PRIORITY_DEFAULT, SCALE_UPDATE_TIMEOUT, () => {
+                this._settings.set_int('border-radius', scale.get_value());
+                this._border_radius_timeout = 0;
+                return GLib.SOURCE_REMOVE;
+            });
+    }
+
+    app_highlight_border_radius_scale_value_changed_cb(scale) {
+        if (this._app_highlight_border_radius_timeout > 0)
+            GLib.source_remove(this._app_highlight_border_radius_timeout);
+        this._app_highlight_border_radius_timeout = GLib.timeout_add(
+            GLib.PRIORITY_DEFAULT, SCALE_UPDATE_TIMEOUT, () => {
+                this._settings.set_int('app-highlight-border-radius', scale.get_value());
+                this._app_highlight_border_radius_timeout = 0;
+                return GLib.SOURCE_REMOVE;
+            });
+    }
+
+    app_highlight_sync_check_toggled_cb(button) {
+        const active = button.get_active();
+        this._builder.get_object('app_highlight_border_radius_scale').set_sensitive(!active);
+        this._builder.get_object('app_highlight_border_radius_label').set_sensitive(!active);
     }
 
     icon_size_scale_value_changed_cb(scale) {
@@ -379,14 +436,12 @@ const DockSettings = GObject.registerClass({
             if (monitor.isPrimary) {
                 dockMonitorCombo.append_text(
                     /* Translators: This will be followed by Display Name - Connector. */
-                    `${__('Primary monitor: ') + monitor.displayName} - ${
-                        monitor.connector}`);
+                    `${__('Primary monitor: ') + monitor.displayName} - ${monitor.connector}`);
                 primaryIndex = this._monitors.length;
             } else {
                 dockMonitorCombo.append_text(
                     /* Translators: Followed by monitor index, Display Name - Connector. */
-                    `${__('Secondary monitor ') + (monitor.index + 1)} - ${
-                        monitor.displayName} - ${monitor.connector}`);
+                    `${__('Secondary monitor ') + (monitor.index + 1)} - ${monitor.displayName} - ${monitor.connector}`);
             }
 
             this._monitors.push(monitor);
@@ -415,18 +470,18 @@ const DockSettings = GObject.registerClass({
         const position = this._settings.get_enum('dock-position');
 
         switch (position) {
-        case 0:
-            this._builder.get_object('position_top_button').set_active(true);
-            break;
-        case 1:
-            this._builder.get_object('position_right_button').set_active(true);
-            break;
-        case 2:
-            this._builder.get_object('position_bottom_button').set_active(true);
-            break;
-        case 3:
-            this._builder.get_object('position_left_button').set_active(true);
-            break;
+            case 0:
+                this._builder.get_object('position_top_button').set_active(true);
+                break;
+            case 1:
+                this._builder.get_object('position_right_button').set_active(true);
+                break;
+            case 2:
+                this._builder.get_object('position_bottom_button').set_active(true);
+                break;
+            case 3:
+                this._builder.get_object('position_left_button').set_active(true);
+                break;
         }
 
         if (this._rtl) {
@@ -588,6 +643,34 @@ const DockSettings = GObject.registerClass({
         this._builder.get_object('preview_size_scale').set_value(
             this._settings.get_double('preview-size-scale'));
 
+        // Floating Dock options
+        const floatingMarginScale = this._builder.get_object('floating_margin_scale');
+        floatingMarginScale.set_value(this._settings.get_int('floating-margin'));
+        floatingMarginScale.set_format_value_func((_, value) => {
+            return `${value} px`;
+        });
+
+        const borderRadiusScale = this._builder.get_object('border_radius_scale');
+        borderRadiusScale.set_value(this._settings.get_int('border-radius'));
+        borderRadiusScale.set_format_value_func((_, value) => {
+            return `${value} px`;
+        });
+
+        const appHighlightBorderRadiusScale = this._builder.get_object('app_highlight_border_radius_scale');
+        appHighlightBorderRadiusScale.set_value(this._settings.get_int('app-highlight-border-radius'));
+        appHighlightBorderRadiusScale.set_format_value_func((_, value) => {
+            return `${value} px`;
+        });
+
+        // App Highlight Sync Binding
+        const appHighlightSyncCheck = this._builder.get_object('app_highlight_sync_check');
+        this._settings.bind('app-highlight-sync-dock-border',
+            appHighlightSyncCheck,
+            'active',
+            Gio.SettingsBindFlags.DEFAULT);
+
+        this.app_highlight_sync_check_toggled_cb(appHighlightSyncCheck);
+
         // Corrent for rtl languages
         if (this._rtl) {
             // Flip value position: this is not done automatically
@@ -645,8 +728,7 @@ const DockSettings = GObject.registerClass({
                 if (check.sensitive) {
                     [check.label] = check.label.split('\n');
                 } else {
-                    check.label += `\n${
-                        __('Managed by GNOME Multitasking\'s Application Switching setting.')}`;
+                    check.label += `\n${__('Managed by GNOME Multitasking\'s Application Switching setting.')}`;
                 }
             });
         this._appSwitcherSettings.bind('current-workspace-only',
@@ -1162,7 +1244,7 @@ const DockSettings = GObject.registerClass({
 export default class DockPreferences extends ExtensionPreferences {
     getPreferencesWidget() {
         const settings = new DockSettings(this);
-        const {widget} = settings;
+        const { widget } = settings;
         return widget;
     }
 }

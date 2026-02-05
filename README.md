@@ -1,53 +1,33 @@
-# Dash to Dock
-![screenshot](https://github.com/micheleg/dash-to-dock/raw/master/media/screenshot.jpg)
+# Dash to Dock Floating
 
-## A dock for the GNOME Shell
-This extension enhances the dash moving it out of the overview and transforming it in a dock for an easier launching of applications and a faster switching between windows and desktops without having to leave the desktop view.
+## A Floating Dock for GNOME Shell
 
-[<img src="https://micheleg.github.io/dash-to-dock/media/get-it-on-ego.png" height="100">](https://extensions.gnome.org/extension/307/dash-to-dock)
+This extension is a fork of the popular [Dash to Dock](https://github.com/micheleg/dash-to-dock), enhanced with "floating" capabilities. It allows you to transform the dash into a floating dock with customizable margins and border radius, giving your desktop a modern, distinct look.
 
-For additional installation instructions and more information visit [https://micheleg.github.io/dash-to-dock/](https://micheleg.github.io/dash-to-dock/).
+**Credit:** Heavily based on Dash to Dock by [micheleg](https://github.com/micheleg). Original floating concepts inspired by previous floating dock implementations.
 
-## Installation from source
+### Features
+All the power of Dash to Dock, plus:
+-   **Floating Mode**: Detach the dock from the screen edge.
+-   **Custom Margins**: Adjust the distance from the screen edge.
+-   **Border Radius**: Customize the roundness of the dock corners and app highlights.
+-   **Sync Highlight**: Option to sync app icon highlight radius with the dock border radius.
 
-The extension can be installed directly from source, either for the convenience of using git or to test the latest development version. Clone the desired branch with git
+### Installation from Source
 
-### Build Dependencies
-
-To compile the stylesheet you'll need an implementation of SASS. Dash to Dock supports `dart-sass` (`sass`), `sassc`, and `ruby-sass`. Every distro should have at least one of these implementations, we recommend using `dart-sass` (`sass`) or `sassc` over `ruby-sass` as `ruby-sass` is deprecated.
-
-By default, Dash to Dock will attempt to build with `sassc`. To change this behavior set the `SASS` environment variable to either `dart` or `ruby`.
-
-```bash
-export SASS=dart
-# or...
-export SASS=ruby
-```
-
-### Building
-
-Clone the repository or download the branch from github. A simple Makefile is included.
-
-Next use `make` to install the extension into your home directory. A Shell reload is required `Alt+F2 r Enter` under Xorg or under Wayland you may have to logout and login. The extension has to be enabled  with *gnome-extensions-app* (GNOME Extensions) or with *dconf*.
+Clone this repository and install using `make`.
 
 ```bash
-git clone https://github.com/micheleg/dash-to-dock.git
-make -C dash-to-dock install
+git clone https://github.com/ahmedhanbal/dash-to-dock-floating.git
+cd dash-to-dock-floating
+make install
 ```
 
-If `msgfmt` is not available on your system, you will see an error message like the following:
+After installation, reload GNOME Shell (`Alt+F2`, type `r`, `Enter` on X11, or re-login on Wayland) and enable the extension "Dash to Dock Floating" using the Extensions app.
 
-```bash
-make: msgfmt: No such file or directory
-```
+### Configuration
+Settings can be accessed via the GNOME Extensions app. 
+-   **Floating Dock Tab**: Controls for margin, border radius, and icon highlight settings.
 
-In this case install the `gettext` package from your distribution's repository.
-
-
-## Bug Reporting
-
-Bugs should be reported to the Github bug tracker [https://github.com/micheleg/dash-to-dock/issues](https://github.com/micheleg/dash-to-dock/issues).
-
-## License
-Dash to Dock Gnome Shell extension is distributed under the terms of the GNU General Public License,
-version 2 or later. See the COPYING file for details.
+### License
+Distributed under the GNU General Public License, version 2 or later. See COPYING for details.
